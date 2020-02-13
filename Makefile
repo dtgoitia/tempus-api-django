@@ -42,4 +42,7 @@ typecheck:
 recreate-db:
 	dropdb ${POSTGRES_DB}
 	createdb ${POSTGRES_DB}
+	rm -rf src/plan/migrations/*
+	python manage.py makemigrations plan
 	python manage.py migrate
+	python manage.py create_random_data
