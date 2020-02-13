@@ -1,5 +1,12 @@
 POSTGRES_DB=tempus
 
+set-up:
+	make install
+	make install-git-hooks
+
+install-git-hooks:
+	pipenv run pre-commit install
+
 install:
 	pipenv install --dev
 
