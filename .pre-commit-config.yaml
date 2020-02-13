@@ -1,0 +1,50 @@
+# See http://pre-commit.com for more information
+# See http://pre-commit.com/hooks.html for more hooks
+fail_fast: true
+repos:
+-   repo: https://github.com/FalconSocial/pre-commit-python-sorter
+    sha: master
+    hooks:
+    -   id: python-import-sorter
+        args: ['--silent-overwrite']
+
+-   repo: local
+    hooks:
+    -   id: black
+        name: Code formatter (Black)
+        entry: make format
+        language: system
+        types: [python]
+        always_run: true  # runs everytime regardless
+
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    sha: v2.4.0
+    hooks:
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-json
+    -   id: debug-statements
+    -   id: requirements-txt-fixer
+        args: [requirements/base.txt, requirements/test.txt]
+    -   id: flake8
+
+-   repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    sha: v1.1.0
+    hooks:
+    #  Analyze your Python requirements for known security vulnerabilities
+    -   id: python-safety-dependencies-check
+
+-   repo: local
+    hooks:
+    -   id: pytest
+        name: py.test
+        entry: make tests
+        language: system
+        types: [python]
+        verbose: true  # outputs log of test run
+        always_run: true  # runs everytime regardless
+    -   id: mypy
+        name: typecheck files
+        entry: make typecheck
+        language: system
+        types: [python]
