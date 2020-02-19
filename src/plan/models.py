@@ -12,7 +12,7 @@ class Exercise(models.Model):
 
 class Goal(models.Model):
     loop = models.ForeignKey(
-        "Loop", related_name="+", on_delete=models.CASCADE
+        "Loop", on_delete=models.CASCADE, related_name="goals",
     )
     exercise = models.ForeignKey(
         Exercise, related_name="+", on_delete=models.CASCADE
@@ -32,7 +32,7 @@ class Goal(models.Model):
 
 class Loop(models.Model):
     plan = models.ForeignKey(
-        "Plan", related_name="+", on_delete=models.CASCADE
+        "Plan", on_delete=models.CASCADE, related_name="loops",
     )
     rounds = models.IntegerField(
         null=False, default=1
