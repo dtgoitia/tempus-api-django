@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "src.plan",
+    "graphene_django",
 ]
 
 MIDDLEWARE = [
