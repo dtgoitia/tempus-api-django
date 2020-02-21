@@ -1,4 +1,18 @@
+import datetime
+from typing import NoReturn, Optional
+
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
+
+
+def is_not_future_datetime(value: datetime.datetime) -> Optional[NoReturn]:
+    now = timezone.now()
+    if now < value:
+        raise ValidationError(
+            f'The value {value.isoformat()} must not be in the future'
+        )
+    return None
 
 
 # TODO: should this be called Action type?
@@ -67,6 +81,7 @@ class Loop(models.Model):
 class Plan(models.Model):
     name = models.TextField(null=False)
     description = models.TextField(default="")
+    # TODO: add creation date and last updated
 
     def __repr__(self) -> str:
         return f"<Plan '{self.name}'>"
@@ -91,11 +106,11 @@ class Session(models.Model):
     # session start and the first executed exercise start.
     # auto_now=False because the time will be recorded by the client, which
     # could be communicated hours later to the server
-    # TODO: validation - 'start' cannot be in the future
     start = models.DateTimeField(
         auto_now=False,
         null=False,
         help_text='Date and time at which the session started.',
+        validators=[is_not_future_datetime],
     )
 
     def __repr__(self) -> str:
@@ -112,19 +127,19 @@ class Record(models.Model):
 
     # auto_now=False because the time will be recorded by the client, which
     # could be communicated hours later to the server
-    # TODO: validation - 'start' cannot be in the future
     start = models.DateTimeField(
         auto_now=False,
         null=False,
         help_text='Date and time at which the execution of the exercise started.',
+        validators=[is_not_future_datetime],
     )
     # auto_now=False because the time will be recorded by the client, which
     # could be communicated hours later to the server
-    # TODO: validation - 'end' cannot be in the future
     end = models.DateTimeField(
         auto_now=False,
         null=False,
         help_text='Date and time at which the execution of the exercise finished.',
+        validators=[is_not_future_datetime],
     )
 
     def __repr__(self) -> str:

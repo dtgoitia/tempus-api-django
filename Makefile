@@ -14,7 +14,8 @@ run:
 	python manage.py runserver
 
 test: check-migration
-	pytest --ds=tests.settings  -vv -x --reuse-db --cov=src/ --cov-config .coveragerc
+	pipenv run pytest --capture=no -vv -x --reuse-db
+	# pytest -vv -x --reuse-db --cov=src/ --cov-config .coveragerc
 	
 check-migration:
 	python manage.py makemigrations --dry-run --check
