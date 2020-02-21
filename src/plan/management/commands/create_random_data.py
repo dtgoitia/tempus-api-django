@@ -1,8 +1,10 @@
+import time
 import uuid
 
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 
-from src.plan.models import Exercise, Goal, Loop, Plan
+from src.plan.models import Exercise, Goal, Loop, Plan, Record, Session
 
 
 def create_uuid() -> str:
@@ -51,6 +53,29 @@ def generate_plan() -> Plan:
     return plan
 
 
+def generate_session() -> Session:
+    session = Session(name='my session', start=timezone.now())
+    session.save()
+    return session
+
+
+def generate_record(session: Session, exercise: Exercise) -> Record:
+    start = timezone.now()
+    time.sleep(0.01)
+    end = timezone.now()
+    record = Record(session=session, exercise=exercise, start=start, end=end)
+    record.save()
+    return record
+
+
+def generate_whole_session() -> None:
+    session = generate_session()
+    exercise = Exercise.objects.first()
+    generate_record(session, exercise)
+    generate_record(session, exercise)
+    generate_record(session, exercise)
+
+
 class Command(BaseCommand):
     help = "Creates random plan data"
 
@@ -66,3 +91,5 @@ class Command(BaseCommand):
             for exercise, i in exercises:
                 goal = generate_goal(loop, i, exercise)
                 goals.append(goal)
+
+        generate_whole_session()
