@@ -15,6 +15,12 @@ def is_not_future_datetime(value: datetime.datetime) -> Optional[NoReturn]:
     return None
 
 
+def is_positive_number(value: int) -> Optional[NoReturn]:
+    if value <= 0:
+        raise ValidationError(f'The value {value} must be positive')
+    return None
+
+
 # TODO: should this be called Action type?
 class ExerciseType(models.TextChoices):
     WORK = 'WORK'
@@ -42,15 +48,21 @@ class Goal(models.Model):
         Exercise, related_name="+", on_delete=models.CASCADE
     )
     # TODO: rename to goal_index
-    # TODO: add helper text 'position of the goal inside the loop'
     entry_index = models.IntegerField(
-        null=False
-    )  # use MinValueValidator... entry_index >= 0
+        null=False,
+        validators=[is_positive_number],
+        help_text='position of the Goal inside the parent Loop',
+    )
     duration = models.IntegerField(
-        null=True
-    )  # use MinValueValidator... duration > 0
-    # use MinValueValidator... duration > 0
-    repetitions = models.IntegerField(null=True)
+        null=True,
+        validators=[is_positive_number],
+        help_text='time allocated to execute the Exercise',
+    )
+    repetitions = models.IntegerField(
+        null=True,
+        validators=[is_positive_number],
+        help_text='amount of times the Exercise needs to be repeated during a single execution',
+    )
 
     # TODO: I don't think a description is needed fot the goals... the Exercise
     # itself should contain all the info related to how to do the exercise, etc
@@ -66,12 +78,16 @@ class Loop(models.Model):
         "Plan", on_delete=models.CASCADE, related_name="loops",
     )
     rounds = models.IntegerField(
-        null=False, default=1
-    )  # use MinValueValidator... rounds > 0
-    # TODO: add helper text 'position of the loop inside the plan'
+        null=False,
+        default=1,
+        validators=[is_positive_number],
+        help_text='amount of times that the whole block of Goals under the Loop will be executed',
+    )
     loop_index = models.IntegerField(
-        null=False
-    )  # use MinValueValidator... loop_index >= 0
+        null=False,
+        validators=[is_positive_number],
+        help_text='position of the Loop inside the parent Plan',
+    )
     description = models.TextField(default="")
 
     def __repr__(self) -> str:
