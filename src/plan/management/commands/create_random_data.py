@@ -4,7 +4,15 @@ import uuid
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from src.plan.models import Exercise, Goal, Loop, Plan, Record, Session
+from src.plan.models import (
+    Exercise,
+    ExerciseType,
+    Goal,
+    Loop,
+    Plan,
+    Record,
+    Session,
+)
 
 
 def create_uuid() -> str:
@@ -15,6 +23,7 @@ def generate_exercise() -> Exercise:
     exercise = Exercise(
         name=f"exercise name {create_uuid()}",
         description=f"exercise description {create_uuid()}",
+        type=ExerciseType.WORK,
     )
     exercise.save()
     return exercise

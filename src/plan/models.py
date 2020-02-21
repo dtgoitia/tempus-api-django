@@ -1,10 +1,20 @@
 from django.db import models
 
 
+# TODO: should this be called Action type?
+class ExerciseType(models.TextChoices):
+    WORK = 'WORK'
+    REST = 'REST'
+    PREPARATION = 'PREP'
+
+
 class Exercise(models.Model):
     name = models.TextField(null=False)
     description = models.TextField(default="")
-    # type = # use DjangoChoicesEnum, from django_graphene
+    # use DjangoChoicesEnum, from django_graphene
+    type = models.CharField(
+        max_length=4, choices=ExerciseType.choices, null=False
+    )
 
     def __repr__(self) -> str:
         return f"<Exercise '{self.name}' #{self.id}>"
@@ -119,10 +129,3 @@ class Record(models.Model):
 
     def __repr__(self) -> str:
         return f"<Record '{self.exercise.name}'>"
-
-
-# class ExerciseType():
-#     NA = 'Na'
-#     TOP = 'Top'
-#     MIDDLE = 'Middle'
-#     BOTTOM = 'Bottom'
