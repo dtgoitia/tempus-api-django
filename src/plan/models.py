@@ -2,6 +2,7 @@ import datetime
 from typing import NoReturn, Optional
 
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
 
@@ -21,7 +22,6 @@ def is_positive_number(value: int) -> Optional[NoReturn]:
     return None
 
 
-# TODO: should this be called Action type?
 class ExerciseType(models.TextChoices):
     WORK = 'WORK'
     REST = 'REST'
@@ -67,11 +67,6 @@ class Goal(models.Model):
         default=False,
         help_text='specifies if the goal waits for users approval to run or not',
     )
-
-    # TODO: I don't think a description is needed fot the goals... the Exercise
-    # itself should contain all the info related to how to do the exercise, etc
-    # so I don't what value can the Goal description add
-    description = models.TextField(default="")
 
     def __repr__(self) -> str:
         return f"<Goal #{self.id}>"
@@ -161,6 +156,8 @@ class Record(models.Model):
         help_text='Date and time at which the execution of the exercise finished.',
         validators=[is_not_future_datetime],
     )
+
+    reps = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
     def __repr__(self) -> str:
         return f"<Record '{self.exercise.name}'>"
