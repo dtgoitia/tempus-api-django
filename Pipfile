@@ -19,6 +19,7 @@ pytest-mock = "*"
 responses = "*"
 snapshottest = "*"
 pre-commit = "*"
+rope = "*"
 
 [packages]
 django = "*"
