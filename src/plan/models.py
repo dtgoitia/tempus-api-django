@@ -62,6 +62,11 @@ class Goal(models.Model):
         validators=[is_positive_number],
         help_text='amount of times the Exercise needs to be repeated during a single execution',
     )
+    pause = models.BooleanField(
+        null=False,
+        default=False,
+        help_text='specifies if the goal waits for users approval to run or not',
+    )
 
     # TODO: I don't think a description is needed fot the goals... the Exercise
     # itself should contain all the info related to how to do the exercise, etc
