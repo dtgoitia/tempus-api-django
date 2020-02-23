@@ -6,6 +6,8 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
 
+EMPTY_STRING = ''
+
 
 def is_not_future_datetime(value: datetime.datetime) -> Optional[NoReturn]:
     now = timezone.now()
@@ -30,9 +32,9 @@ class ExerciseType(models.TextChoices):
 
 class Exercise(models.Model):
     name = models.TextField(null=False)
-    description = models.TextField(default="")
+    description = models.TextField(default=EMPTY_STRING)
     # use DjangoChoicesEnum, from django_graphene
-    type = models.CharField(
+    exercise_type = models.CharField(
         max_length=4, choices=ExerciseType.choices, null=False
     )
 
@@ -87,7 +89,7 @@ class Loop(models.Model):
         validators=[is_positive_number],
         help_text='position of the Loop inside the parent Plan',
     )
-    description = models.TextField(default="")
+    description = models.TextField(default=EMPTY_STRING)
 
     def __repr__(self) -> str:
         return f"<Loop #{self.id}>"
@@ -95,7 +97,7 @@ class Loop(models.Model):
 
 class Plan(models.Model):
     name = models.TextField(null=False)
-    description = models.TextField(default="")
+    description = models.TextField(default=EMPTY_STRING)
     # TODO: add creation date and last updated
 
     def __repr__(self) -> str:
@@ -107,11 +109,11 @@ class Session(models.Model):
         null=False, help_text='Short name for the user to identify the session'
     )
     description = models.TextField(
-        default="",
+        default=EMPTY_STRING,
         help_text='Short description for the user to get a better understanding of what the session is about',
     )
     notes = models.TextField(
-        default="",
+        default=EMPTY_STRING,
         help_text='Optional space for notes like: what went well/bad, injuries, why the session was aborted...',
     )
 
