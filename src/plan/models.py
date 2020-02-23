@@ -47,8 +47,7 @@ class Goal(models.Model):
     exercise = models.ForeignKey(
         Exercise, related_name="+", on_delete=models.CASCADE
     )
-    # TODO: rename to goal_index
-    entry_index = models.IntegerField(
+    goal_index = models.IntegerField(
         null=False,
         validators=[is_positive_number],
         help_text='position of the Goal inside the parent Loop',

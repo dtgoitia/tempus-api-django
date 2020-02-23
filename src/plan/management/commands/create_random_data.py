@@ -33,7 +33,7 @@ def generate_goal(loop: Loop, index: int, exercise: Exercise) -> Goal:
     goal = Goal(
         loop=loop,
         exercise=exercise,
-        entry_index=index,
+        goal_index=index,
         duration=10,
         repetitions=3,
         description=f"description of the Goal {create_uuid()}",
