@@ -1,3 +1,4 @@
+import datetime
 import time
 import uuid
 
@@ -23,7 +24,7 @@ def generate_exercise() -> Exercise:
     exercise = Exercise(
         name=f"exercise name {create_uuid()}",
         description=f"exercise description {create_uuid()}",
-        type=ExerciseType.WORK,
+        exercise_type=ExerciseType.WORK,
     )
     exercise.save()
     return exercise
@@ -36,7 +37,6 @@ def generate_goal(loop: Loop, index: int, exercise: Exercise) -> Goal:
         goal_index=index,
         duration=10,
         repetitions=3,
-        description=f"description of the Goal {create_uuid()}",
     )
     goal.save()
     return goal
@@ -54,9 +54,12 @@ def generate_loop(plan: Plan, index: int) -> Loop:
 
 
 def generate_plan() -> Plan:
+    creation_datetime = timezone.now() - datetime.timedelta(hours=1)
     plan = Plan(
         name=f"plan name {create_uuid()}",
         description=f"plan description {create_uuid()}",
+        created=creation_datetime,
+        last_updated=creation_datetime,
     )
     plan.save()
     return plan

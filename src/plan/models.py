@@ -89,7 +89,9 @@ class Loop(models.Model):
         validators=[is_positive_number],
         help_text='position of the Loop inside the parent Plan',
     )
-    description = models.TextField(default=EMPTY_STRING)
+    description = models.TextField(
+        default=EMPTY_STRING, help_text='description for a group of goals'
+    )
 
     def __repr__(self) -> str:
         return f"<Loop #{self.id}>"
@@ -98,7 +100,8 @@ class Loop(models.Model):
 class Plan(models.Model):
     name = models.TextField(null=False)
     description = models.TextField(default=EMPTY_STRING)
-    # TODO: add creation date and last updated
+    created = models.DateTimeField(null=False)
+    last_updated = models.DateTimeField(null=False)
 
     def __repr__(self) -> str:
         return f"<Plan '{self.name}'>"
