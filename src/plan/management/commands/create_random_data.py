@@ -65,6 +65,21 @@ def generate_plan() -> Plan:
     return plan
 
 
+def generate_whole_plan() -> None:
+    """Creates a Plan, with Loops, Goals and Exercises."""
+    plan = generate_plan()
+
+    loops = [generate_loop(plan, i) for i in range(4)]
+
+    exercises = [(generate_exercise(), i) for i in range(3)]
+
+    goals = []
+    for loop in loops:
+        for exercise, i in exercises:
+            goal = generate_goal(loop, i, exercise)
+            goals.append(goal)
+
+
 def generate_session() -> Session:
     session = Session(name='my session', start=timezone.now())
     session.save()
@@ -92,16 +107,6 @@ class Command(BaseCommand):
     help = "Creates random plan data"
 
     def handle(self, *args, **kwargs):
-        plan = generate_plan()
-
-        loops = [generate_loop(plan, i) for i in range(4)]
-
-        exercises = [(generate_exercise(), i) for i in range(3)]
-
-        goals = []
-        for loop in loops:
-            for exercise, i in exercises:
-                goal = generate_goal(loop, i, exercise)
-                goals.append(goal)
-
+        generate_whole_plan()
+        generate_whole_plan()
         generate_whole_session()
