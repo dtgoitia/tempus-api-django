@@ -1,46 +1,16 @@
 import graphene
-from graphene_django.types import DjangoObjectType
 
-from src.plan.models import Exercise, Goal, Loop, Plan, Record, Session
-
-
-class ExerciseGraphqlType(DjangoObjectType):
-    class Meta:
-        model = Exercise
-
-
-class GoalGraphqlType(DjangoObjectType):
-    class Meta:
-        model = Goal
-
-
-class LoopGraphqlType(DjangoObjectType):
-    class Meta:
-        model = Loop
-
-
-class PlanGraphqlType(DjangoObjectType):
-    class Meta:
-        model = Plan
-
-
-class RecordGraphqlType(DjangoObjectType):
-    class Meta:
-        model = Record
-
-
-class SessionGraphqlType(DjangoObjectType):
-    class Meta:
-        model = Session
+from src.plan.api.graphql import types
+from src.plan.models import Exercise, Plan, Session
 
 
 class Query(object):
-    plans = graphene.List(PlanGraphqlType)
-    sessions = graphene.List(SessionGraphqlType)
+    plans = graphene.List(types.PlanGraphqlType)
+    sessions = graphene.List(types.SessionGraphqlType)
     exercise = graphene.Field(
-        ExerciseGraphqlType, exercise_id=graphene.String()
+        types.ExerciseGraphqlType, exercise_id=graphene.String()
     )
-    exercises = graphene.List(ExerciseGraphqlType)
+    exercises = graphene.List(types.ExerciseGraphqlType)
 
     def resolve_plans(self, info, **kwargs):
         return Plan.objects.all()

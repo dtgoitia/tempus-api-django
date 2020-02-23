@@ -109,6 +109,7 @@ class Plan(models.Model):
         null=False, help_text='Short name for the user to identify the plan.',
     )
     description = models.TextField(
+        blank=True,
         default=EMPTY_STRING,
         help_text='Optional space for a longer description of what the plan is about.',
     )
@@ -131,10 +132,12 @@ class Session(models.Model):
         help_text='Short name for the user to identify the session.',
     )
     description = models.TextField(
+        blank=True,
         default=EMPTY_STRING,
         help_text='Short description for the user to get a better understanding of what the session is about.',
     )
     notes = models.TextField(
+        blank=True,
         default=EMPTY_STRING,
         help_text='Optional space for notes like: what went well/bad, injuries, why the session was aborted...',
     )

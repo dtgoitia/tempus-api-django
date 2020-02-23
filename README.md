@@ -53,3 +53,46 @@ query {
   }
 }
 ```
+
+Create a session:
+
+```graphql
+mutation thisIsAnOptionalNameForTheMutation {
+  $name: String!,
+  $start: DateTime!,
+  $records: [RecordInput]!
+) {
+  createSession(name: $name, start: $start, records: $records) {
+    session {
+      name
+      description
+      notes
+      start
+      records {
+        start
+        end
+        exercise {
+          id
+        }
+      }
+    }
+  }
+}
+```
+
+variables:
+
+```json
+{
+  "name": "broken session",
+  "start": "2020-02-21T11:03:19.337763+00:00",
+  "records": [
+    {
+      "exerciseId": "1",
+      "reps": 10,
+      "start": "2020-02-23T11:03:19.325868+00:00",
+      "end": "2020-02-23T11:03:19.335990+00:00"
+    }
+  ]
+}
+```

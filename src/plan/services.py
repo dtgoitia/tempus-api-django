@@ -1,7 +1,8 @@
 import datetime
-from typing import Any, NoReturn, Optional, Union
+from typing import Any, List, NoReturn, Optional, Union
 
 import django
+from django.db import transaction
 
 from src.plan.models import (
     Exercise,
@@ -12,6 +13,8 @@ from src.plan.models import (
     Record,
     Session,
 )
+
+NO_RECORDS: List[Record] = []
 
 
 def get_default_from_model(
@@ -51,6 +54,13 @@ class ExerciseService:
         exercise.full_clean()
         exercise.save()
         return exercise
+
+    @staticmethod
+    def get_by_id(id: int) -> Optional[Exercise]:
+        try:
+            return Exercise.objects.get(pk=id)
+        except Exercise.DoesNotExist:
+            return None
 
     @staticmethod
     def get_or_create(
@@ -172,7 +182,7 @@ class RecordService:
     def _validate_exercise_type_and_record_reps(
         cls, **kwargs
     ) -> Optional[NoReturn]:
-        exercise_type = kwargs[cls._exercise_key].type
+        exercise_type = kwargs[cls._exercise_key].exercise_type
         reps = kwargs.get(cls._reps_key, cls._reps_default_value)
 
         if exercise_type == ExerciseType.REST and reps == 0:
@@ -193,16 +203,33 @@ class RecordService:
 
 
 class SessionService:
-    @staticmethod
+    @classmethod
     def create(
+        cls,
         *,
         name: str,
         description: str = get_default_from_model(Session, 'description'),
         notes: str = get_default_from_model(Session, 'notes'),
         start: datetime.datetime,
+        records: List[Record] = NO_RECORDS,
     ) -> Session:
-        session = Session(
-            name=name, description=description, notes=notes, start=start
-        )
-        session.full_clean()
-        return session.save()
+        with transaction.atomic():
+            session = Session(
+                name=name, description=description, notes=notes, start=start
+            )
+            session.full_clean()
+            session.save()
+            for record in records:
+                exercise = ExerciseService.get_by_id(record.exercise_id)
+                if not exercise:
+                    raise Exception(
+                        f"""Failed to create Record because there the Exercise with ID {record.exercise_id} does not exist. Record data: start={record.start.isoformat()}, end={record.end.isoformat()}"""
+                    )
+                RecordService.create(
+                    start=record.start,
+                    end=record.end,
+                    reps=record.reps,
+                    exercise=exercise,
+                    session=session,
+                )
+            return session
