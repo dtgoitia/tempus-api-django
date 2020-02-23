@@ -31,9 +31,15 @@ class ExerciseType(models.TextChoices):
 
 
 class Exercise(models.Model):
-    name = models.TextField(null=False)
-    description = models.TextField(default=EMPTY_STRING)
-    # use DjangoChoicesEnum, from django_graphene
+    name = models.TextField(
+        null=False,
+        help_text='Short name for the user to identify the exercise.',
+    )
+    description = models.TextField(
+        default=EMPTY_STRING,
+        help_text='Optional space for details about the exercise, technique, caveats...',
+    )
+    # TODO: use DjangoChoicesEnum, from django_graphene
     exercise_type = models.CharField(
         max_length=4, choices=ExerciseType.choices, null=False
     )
@@ -52,22 +58,22 @@ class Goal(models.Model):
     goal_index = models.IntegerField(
         null=False,
         validators=[is_positive_number],
-        help_text='position of the Goal inside the parent Loop',
+        help_text='Position of the Goal inside the parent Loop.',
     )
     duration = models.IntegerField(
         null=True,
         validators=[is_positive_number],
-        help_text='time allocated to execute the Exercise',
+        help_text='Time allocated to execute the Exercise.',
     )
     repetitions = models.IntegerField(
         null=True,
         validators=[is_positive_number],
-        help_text='amount of times the Exercise needs to be repeated during a single execution',
+        help_text='Amount of times the Exercise should be repeated during a single execution of the Goal.',
     )
     pause = models.BooleanField(
         null=False,
         default=False,
-        help_text='specifies if the goal waits for users approval to run or not',
+        help_text='Specifies if the goal waits for users approval to run or not.',
     )
 
     def __repr__(self) -> str:
@@ -82,15 +88,16 @@ class Loop(models.Model):
         null=False,
         default=1,
         validators=[is_positive_number],
-        help_text='amount of times that the whole block of Goals under the Loop will be executed',
+        help_text='Amount of times that the whole block of child Goals under the Loop will be executed.',
     )
     loop_index = models.IntegerField(
         null=False,
         validators=[is_positive_number],
-        help_text='position of the Loop inside the parent Plan',
+        help_text='Position of the Loop inside the parent Plan.',
     )
     description = models.TextField(
-        default=EMPTY_STRING, help_text='description for a group of goals'
+        default=EMPTY_STRING,
+        help_text='Optional description for a group of goals.',
     )
 
     def __repr__(self) -> str:
@@ -98,10 +105,21 @@ class Loop(models.Model):
 
 
 class Plan(models.Model):
-    name = models.TextField(null=False)
-    description = models.TextField(default=EMPTY_STRING)
-    created = models.DateTimeField(null=False)
-    last_updated = models.DateTimeField(null=False)
+    name = models.TextField(
+        null=False, help_text='Short name for the user to identify the plan.',
+    )
+    description = models.TextField(
+        default=EMPTY_STRING,
+        help_text='Optional space for a longer description of what the plan is about.',
+    )
+    created = models.DateTimeField(
+        null=False,
+        help_text='Moment at which the plan was created in the client. This time has nothing to do with when was the plan saved in the backend.',
+    )
+    last_updated = models.DateTimeField(
+        null=False,
+        help_text='Moment at which the plan was update for last time in the client. This time has nothing to do with when was the plan updated in the backend.',
+    )
 
     def __repr__(self) -> str:
         return f"<Plan '{self.name}'>"
@@ -109,11 +127,12 @@ class Plan(models.Model):
 
 class Session(models.Model):
     name = models.TextField(
-        null=False, help_text='Short name for the user to identify the session'
+        null=False,
+        help_text='Short name for the user to identify the session.',
     )
     description = models.TextField(
         default=EMPTY_STRING,
-        help_text='Short description for the user to get a better understanding of what the session is about',
+        help_text='Short description for the user to get a better understanding of what the session is about.',
     )
     notes = models.TextField(
         default=EMPTY_STRING,
@@ -129,7 +148,7 @@ class Session(models.Model):
     start = models.DateTimeField(
         auto_now=False,
         null=False,
-        help_text='Date and time at which the session started.',
+        help_text='Moment at which the session started.',
         validators=[is_not_future_datetime],
     )
 
@@ -139,7 +158,7 @@ class Session(models.Model):
 
 class Record(models.Model):
     session = models.ForeignKey(
-        Session, on_delete=models.CASCADE, related_name='records', null=False
+        Session, on_delete=models.CASCADE, related_name='records', null=False,
     )
     exercise = models.ForeignKey(
         Exercise, on_delete=models.CASCADE, related_name='+', null=False
@@ -150,7 +169,7 @@ class Record(models.Model):
     start = models.DateTimeField(
         auto_now=False,
         null=False,
-        help_text='Date and time at which the execution of the exercise started.',
+        help_text='Moment at which the execution of the exercise started.',
         validators=[is_not_future_datetime],
     )
     # auto_now=False because the time will be recorded by the client, which
@@ -158,11 +177,15 @@ class Record(models.Model):
     end = models.DateTimeField(
         auto_now=False,
         null=False,
-        help_text='Date and time at which the execution of the exercise finished.',
+        help_text='Moment at which the execution of the exercise finished.',
         validators=[is_not_future_datetime],
     )
 
-    reps = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    reps = models.IntegerField(
+        default=0,
+        validators=[MinValueValidator(0)],
+        help_text='Amount of times the execise was repeated during the record.',
+    )
 
     def __repr__(self) -> str:
         return f"<Record '{self.exercise.name}'>"
