@@ -22,6 +22,7 @@ from src.schema import schema
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    # TODO: disable GraphiQL for production
     path("graphiql", GraphQLView.as_view(schema=schema, graphiql=True)),
     path(
         'graphql',
