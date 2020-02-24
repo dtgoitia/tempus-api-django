@@ -15,6 +15,7 @@ from src.plan.models import (
 )
 
 NO_RECORDS: List[Record] = []
+NO_LOOPS: List[Loop] = []
 
 
 def get_default_from_model(
@@ -38,6 +39,80 @@ def get_default_from_model(
     raise Exception(
         f"Dear developer, sorry but the field '{field_name}'  (in the model {model.__name__}) does not have a default value"
     )
+
+
+def validate_indexes(
+    indexes: List[int], parent_classname: str, child_classname: str
+) -> Optional[NoReturn]:
+    """Check that the Parent in the Child have the right indexes."""
+    indexes.sort()
+
+    # First index must be zero
+    if indexes[0] != 0:
+        raise Exception(
+            f'Missing first {parent_classname}, first {parent_classname} index must be 0 (zero).'
+        )
+
+    # No duplicated indexes allowed
+    deduped_indexes = set(indexes)
+    if len(deduped_indexes) != len(indexes):
+        duplicated_indexes = []
+        for index in indexes:
+            if indexes.count(index) > 1:
+                duplicated_indexes.append(index)
+        msg = f'Duplicated {child_classname} found in {parent_classname}: '
+        dupe_report = []
+        for index in set(duplicated_indexes):
+            ocurrences = duplicated_indexes.count(index)
+            dupe_report.append(
+                f'{child_classname} index {index} was found {ocurrences} times'
+            )
+        msg += (', ').join(dupe_report)
+        raise Exception(msg)
+
+    # Indexes must be sequential and have no gaps
+    for index, reference in zip(indexes, range(len(indexes))):
+        if index != reference:
+            raise Exception(
+                f'{child_classname} with index {index} found after index {reference - 1}, but index {reference} was expected.'
+            )
+    return None
+
+
+def validate_goal_indexes(goals: List[Goal]) -> Optional[NoReturn]:
+    """Check that the Goals in the Loop have the right indexes."""
+    goal_indexes = [goal.goal_index for goal in goals]
+    validate_indexes(goal_indexes, Loop.__name__, Goal.__name__)
+    return None
+
+
+def validate_loop_indexes(loops: List[Loop]) -> Optional[NoReturn]:
+    """Check that the Loops in the Plan have the right indexes."""
+    loop_indexes = [loop.loop_index for loop in loops]
+    validate_indexes(loop_indexes, Plan.__name__, Loop.__name__)
+    return None
+
+
+def validate_loop_and_goal_indexes(loops: List[Loop]) -> Optional[NoReturn]:
+    """Check that the Loops and Goals in the Plan have the right indexes.
+
+    A loop_index represents the position of a Loop inside a Plan.
+    A goal_index represents the position of a Goal inside a Loop.
+
+    Both loops_index and goal_index must start on 0 (zero) and grow one by one
+    withou skipping any number:
+
+      - Good: 0, 1, 2, 3, 4
+      - Bad:  1, 2, 3, 4, 5  --> Notice the first item is not 0
+      - Bad:  0, 1, 7, 8, 9  --> Notice the gap between 1 and 7
+
+    If the validation fails, an exception will be raise with the appropiate
+    information. Otherwise, this function return None.
+    """
+    validate_loop_indexes(loops)
+    for loop in loops:
+        validate_goal_indexes(loop.goals)
+    return None
 
 
 class ExerciseService:
@@ -143,19 +218,50 @@ class LoopService:
 class PlanService:
     @staticmethod
     def create(
-        *, name: str, description: str = None, created: datetime.datetime
+        *,
+        name: str,
+        description: str = None,
+        created: datetime.datetime,
+        loops: List[Loop] = NO_LOOPS,
     ) -> Plan:
-        if description is None:
-            plan = Plan(name=name, created=created, last_updated=created)
-        else:
+        validate_loop_and_goal_indexes(loops)
+        with transaction.atomic():
             plan = Plan(
                 name=name,
                 description=description,
                 created=created,
                 last_updated=created,
             )
-        plan.full_clean()
-        plan.save()
+            plan.full_clean()
+            plan.save()
+
+            for loop_data in loops:
+                loop = Loop(
+                    plan=plan,
+                    rounds=loop_data.rounds,
+                    loop_index=loop_data.loop_index,
+                    description=loop_data.description,
+                )
+                loop.full_clean()
+                loop.save()
+
+                for goal_data in loop_data.goals:
+                    exercise = ExerciseService.get_by_id(goal_data.exercise_id)
+                    if not exercise:
+                        raise Exception(
+                            f'It was not possible to create Goal because there is no Exercise with ID {goal_data.exercise_id}. Loop {loop_data.loop_index}, Goal {goal_data.goal_index}'
+                        )
+                    goal = Goal(
+                        loop=loop,
+                        exercise=exercise,
+                        goal_index=goal_data.goal_index,
+                        duration=goal_data.duration,
+                        repetitions=goal_data.repetitions,
+                        pause=goal_data.pause,
+                    )
+                    goal.full_clean()
+                    goal.save()
+
         return plan
 
     @staticmethod

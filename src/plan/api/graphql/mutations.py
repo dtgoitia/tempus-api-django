@@ -4,10 +4,51 @@ from typing import List
 import graphene
 
 from src.plan.api.graphql import types
-from src.plan.models import Record
-from src.plan.services import ExerciseService, SessionService
+from src.plan.models import Loop, Record
+from src.plan.services import ExerciseService, PlanService, SessionService
 
 NO_RECORDS: List[Record] = []
+NO_LOOPS: List[Loop] = []
+
+
+class GoalsInput(graphene.InputObjectType):
+    goal_index = graphene.Int(required=True)
+    exercise_id = graphene.Int(required=True)
+    repetitions = graphene.Int(required=True)
+    duration = graphene.Int(required=True)
+    pause = graphene.Boolean(required=True)
+
+
+class LoopInput(graphene.InputObjectType):
+    rounds = graphene.Int(required=True)
+    description = graphene.String(required=False)
+    loop_index = graphene.Int(required=True)
+    goals = graphene.List(GoalsInput, required=True)
+
+
+class CreatePlan(graphene.Mutation):
+    class Arguments:
+        name = graphene.String(required=True)
+        description = graphene.String(required=False)
+        created = graphene.DateTime(required=True)
+        loops = graphene.List(LoopInput, required=True)
+
+    plan = graphene.Field(types.PlanGraphqlType)
+
+    @staticmethod
+    def mutate(
+        root,
+        info,
+        name: str,
+        description: str,
+        created: datetime.datetime,
+        loops: List[Loop] = NO_LOOPS,
+    ) -> 'CreatePlan':
+        """Create a Plan and return it."""
+        plan = PlanService.create(
+            name=name, description=description, created=created, loops=loops
+        )
+        return CreatePlan(plan=plan)
 
 
 class CreateExercise(graphene.Mutation):
@@ -71,4 +112,5 @@ class CreateSession(graphene.Mutation):
 
 class Mutation:
     create_exercise = CreateExercise.Field()
+    create_plan = CreatePlan.Field()
     create_session = CreateSession.Field()

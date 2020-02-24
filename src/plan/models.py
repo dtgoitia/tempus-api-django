@@ -39,7 +39,6 @@ class Exercise(models.Model):
         default=EMPTY_STRING,
         help_text='Optional space for details about the exercise, technique, caveats...',
     )
-    # TODO: use DjangoChoicesEnum, from django_graphene
     exercise_type = models.CharField(
         max_length=4, choices=ExerciseType.choices, null=False
     )
@@ -57,7 +56,7 @@ class Goal(models.Model):
     )
     goal_index = models.IntegerField(
         null=False,
-        validators=[is_positive_number],
+        validators=[MinValueValidator(0)],
         help_text='Position of the Goal inside the parent Loop.',
     )
     duration = models.IntegerField(
@@ -92,7 +91,7 @@ class Loop(models.Model):
     )
     loop_index = models.IntegerField(
         null=False,
-        validators=[is_positive_number],
+        validators=[MinValueValidator(0)],
         help_text='Position of the Loop inside the parent Plan.',
     )
     description = models.TextField(
