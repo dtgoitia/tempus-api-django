@@ -5,9 +5,30 @@ import graphene
 
 from src.plan.api.graphql import types
 from src.plan.models import Record
-from src.plan.services import SessionService
+from src.plan.services import ExerciseService, SessionService
 
 NO_RECORDS: List[Record] = []
+
+
+class CreateExercise(graphene.Mutation):
+    class Arguments:
+        name = graphene.String(required=True)
+        description = graphene.String(required=False)
+        exercise_type = graphene.Argument(
+            types.ExerciseTypeGraphqlType, required=True
+        )
+
+    exercise = graphene.Field(types.ExerciseGraphqlType)
+
+    @staticmethod
+    def mutate(
+        root, info, name: str, description: str, exercise_type: str
+    ) -> 'CreateExercise':
+        """Create an Exercise and return it."""
+        exercise = ExerciseService.create(
+            name=name, description=description, exercise_type=exercise_type
+        )
+        return CreateExercise(exercise=exercise)
 
 
 class RecordInput(graphene.InputObjectType):
@@ -49,4 +70,5 @@ class CreateSession(graphene.Mutation):
 
 
 class Mutation:
+    create_exercise = CreateExercise.Field()
     create_session = CreateSession.Field()

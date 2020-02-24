@@ -1,6 +1,17 @@
+import graphene
 from graphene_django.types import DjangoObjectType
 
-from src.plan.models import Exercise, Goal, Loop, Plan, Record, Session
+from src.plan.models import (
+    Exercise,
+    ExerciseType,
+    Goal,
+    Loop,
+    Plan,
+    Record,
+    Session,
+)
+
+ExerciseTypeGraphqlType = graphene.Enum.from_enum(ExerciseType)
 
 
 class ExerciseGraphqlType(DjangoObjectType):

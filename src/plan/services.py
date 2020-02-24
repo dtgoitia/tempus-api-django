@@ -49,7 +49,7 @@ class ExerciseService:
         exercise_type: str,
     ) -> Exercise:
         exercise = Exercise(
-            name=name, description=description, type=exercise_type
+            name=name, description=description, exercise_type=exercise_type
         )
         exercise.full_clean()
         exercise.save()
