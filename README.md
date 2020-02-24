@@ -1,7 +1,7 @@
 # Development set up
 
 ```shell
-make install
+make set-up
 ```
 
 ## GraphiQL
