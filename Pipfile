@@ -23,6 +23,7 @@ snapshottest = "*"
 
 [packages]
 django = "*"
+django-cors-headers = "*"
 django-environ = "*"
 graphene-django = "*"
 psycopg2 = "*"
