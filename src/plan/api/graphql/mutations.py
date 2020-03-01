@@ -72,6 +72,18 @@ class CreateExercise(graphene.Mutation):
         return CreateExercise(exercise=exercise)
 
 
+class DeleteExercise(graphene.Mutation):
+    class Arguments:
+        id = graphene.String(required=True)
+
+    success = graphene.Boolean()
+
+    @staticmethod
+    def mutate(root, info, id: str) -> 'DeleteExercise':
+        success = ExerciseService.delete(id=int(id))
+        return DeleteExercise(success=success)
+
+
 class RecordInput(graphene.InputObjectType):
     exercise_id = graphene.String(required=True)
     start = graphene.DateTime(required=True)
@@ -112,5 +124,6 @@ class CreateSession(graphene.Mutation):
 
 class Mutation:
     create_exercise = CreateExercise.Field()
+    delete_exercise = DeleteExercise.Field()
     create_plan = CreatePlan.Field()
     create_session = CreateSession.Field()
