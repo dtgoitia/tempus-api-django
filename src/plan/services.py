@@ -171,6 +171,18 @@ class ExerciseService:
         except Exercise.DoesNotExist:
             return None
 
+    @staticmethod
+    def delete(*, id: int) -> bool:
+        exercise = ExerciseService.get_by_id(id)
+        if not exercise:
+            return False
+        deleted_resources = exercise.delete()
+        # deleted_resources example:
+        # (8, {'plan.Goal': 4, 'plan.Record': 3, 'plan.Exercise': 1})
+        if len(deleted_resources) == 2:
+            return True
+        return False
+
 
 class GoalService:
     @staticmethod
