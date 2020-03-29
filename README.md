@@ -96,3 +96,11 @@ variables:
   ]
 }
 ```
+
+## Testing
+
+Development testing: `make test-dev`
+
+  - Run only tests marked with the `@pytest.mark.focus` custom decorator
+  - Start `ipdb` on error.
+  - See `Makefile` for more info.

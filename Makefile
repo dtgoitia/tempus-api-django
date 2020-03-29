@@ -14,8 +14,7 @@ run:
 	python manage.py runserver
 
 test: check-migration
-	pipenv run pytest --capture=no -vv -x --reuse-db
-	# pytest -vv -x --reuse-db --cov=src/ --cov-config .coveragerc
+	pipenv run pytest -vv -x
 	
 check-migration:
 	python manage.py makemigrations --dry-run --check
@@ -35,10 +34,20 @@ shell:
 	python manage.py shell
 
 test-dev:
-	pytest -f -vv -x tests/
+	pipenv run pytest -m focus -x --pdb --pdbcls=IPython.terminal.debugger:TerminalPdb -vv --setup-show --no-cov
+# -m focus     | Run only focused tests (@pytest.mark.focus)
+# -x           | stop after first failure
+# --pdb        | start ipdb on error
+# --pdbcls=IPython.terminal.debugger:TerminalPdb | (see line above)
+# -vv          | show all of assert comparisons instead of truncating
+# --setup-show | show setup of fixtures while executing tests
+# --no-cov     | disable coverage report completely
 
 typecheck:
 	python -m mypy --config-file setup.cfg --package src
+
+typecheck-test:
+	python -m mypy --config-file setup.cfg --package src --package tests
 
 recreate-db:
 	dropdb ${POSTGRES_DB}
